@@ -1,0 +1,1 @@
+{"uuid":"b2a1479d-c74d-4e09-906f-be2d965e3084","name":"DELETE /api/v1/courier/:id trying delete an existed courier","children":["555b827f-a263-4d94-82cd-bf9b8b751acd"],"befores":[],"afters":[],"start":1714651307444,"stop":1714651308388}
