@@ -1,14 +1,12 @@
 package ru.qa.scooter.utils.api.requests;
 
-import freemarker.core.ReturnInstruction;
+
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
-import ru.qa.scooter.business.pojo.courier.AbstractCourier;
-import ru.qa.scooter.business.pojo.courier.Courier;
-import ru.qa.scooter.business.pojo.order.Order;
 import ru.qa.scooter.utils.api.checkers.Checkers;
 
 public class Precondition {
+
 
     private Precondition(){
 

@@ -76,18 +76,6 @@ public class CourierApi {
                 getLoginResponseBody(response));
     }
 
-//    @Step("Postcondition: delete courier from database")
-//    protected static void postconditionCleanDBdelCourier(AbstractCourier courier) {
-//        Response responseDelete = CourierApi.delCourier(courier);
-//        Checkers.check200Success(responseDelete);
-//    }
-//
-//    @Step("Postcondition: delete courier from database")
-//    protected static void postconditionCleanDBdelCourier(int id) {
-//        Response responseDelete = CourierApi.delCourier(id);
-//        Checkers.check200Success(responseDelete);
-//    }
-
     @Step("Delete courier. Send DELETE /api/v1/courier/id")
     public static Response delCourier(int id) {
         return given()
@@ -126,11 +114,5 @@ public class CourierApi {
                 getCreateResponseBody(response));
     }
 
-
-//    protected static <T, V, K> Response preconditionCreateCourier(Courier<T, V, K> courier) {
-//        Response response = CourierApi.createCourier(courier);
-//        Checkers.check201Created(response);
-//        return response;
-//    }
 
 }
