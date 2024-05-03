@@ -41,7 +41,7 @@ public class Courier <T, V, K> extends AbstractCourier {
     @Override
     public String toString() {
         return String.format(
-                    "Courier: login - \"%s\", password - \"%s\", firstName - \"%s\"",
+                    "Courier: login - %s, password - %s, firstName - %s",
                     login,
                     password,
                     firstName

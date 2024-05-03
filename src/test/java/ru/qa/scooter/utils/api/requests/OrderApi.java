@@ -12,18 +12,18 @@ import static io.restassured.RestAssured.given;
 
 public class OrderApi {
 
-    private final static String makeOrderEndPoint = "/api/v1/orders/";
+    private final static String MAKE_ORDER_ENDPOINT = "/api/v1/orders/";
 
-    private final static String acceptOrderEndPoint = "/api/v1/orders/accept/";
+    private final static String ACCEPT_ORDER_ENDPOINT = "/api/v1/orders/accept/";
 
-    private static String getMakeOrderEndPoint() {
-        return makeOrderEndPoint;
+    private static String getMakeOrderEndpoint() {
+        return MAKE_ORDER_ENDPOINT;
     }
 
     private static String getMakeOrderBody(Response response) {
         return String.format(
                 "Make order POST %s. \nBody:\n%s",
-                getMakeOrderEndPoint(),
+                getMakeOrderEndpoint(),
                 response.body().asPrettyString()
         );
     }
@@ -31,19 +31,19 @@ public class OrderApi {
     private static String getAcceptOrderEndPoint(int orderId) {
         return String.format(
                 "%s%d",
-                acceptOrderEndPoint,
+                ACCEPT_ORDER_ENDPOINT,
                 orderId
         );
     }
 
-    private static String getAcceptOrderEndPoint() {
-        return acceptOrderEndPoint;
+    private static String getAcceptOrderEndpoint() {
+        return ACCEPT_ORDER_ENDPOINT;
     }
 
     private static String getAcceptOrderFullEndPoint(int orderId, int courierId) {
         return String.format(
                 "%s%d?courierId=%d",
-                acceptOrderEndPoint,
+                ACCEPT_ORDER_ENDPOINT,
                 orderId,
                 courierId
         );
@@ -68,7 +68,7 @@ public class OrderApi {
     private static String getAcceptOrderBody(Response response, CourierId courierId) {
         return String.format(
                 "Login courier POST \"%s?courierId=%d\",. \nBody:\n%s",
-                getAcceptOrderEndPoint(),
+                getAcceptOrderEndpoint(),
                 courierId.getId(),
                 response.body().asPrettyString()
         );
@@ -90,7 +90,7 @@ public class OrderApi {
                                 .and()
                                 .body(order)
                                 .when()
-                                .post(getMakeOrderEndPoint());
+                                .post(getMakeOrderEndpoint());
 
         return new ResponseWithToString(response, getMakeOrderBody(response));
     }
@@ -109,7 +109,7 @@ public class OrderApi {
     public static Response acceptOrder(CourierId courier) {
         Response response = given()
                 .queryParam("courierId", courier.getId())
-                .put(getAcceptOrderEndPoint());
+                .put(getAcceptOrderEndpoint());
 
         return new ResponseWithToString(response, getAcceptOrderBody(response, courier));
     }

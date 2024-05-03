@@ -2,36 +2,28 @@ package ru.qa.scooter.tests.courier.login;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.qa.scooter.business.pojo.courier.Courier;
 import ru.qa.scooter.business.pojo.courier.CourierWithoutFirstName;
+import ru.qa.scooter.tests.base.BaseScooter;
 import ru.qa.scooter.utils.api.checkers.Checkers;
 import ru.qa.scooter.utils.api.requests.Postcondition;
 import ru.qa.scooter.utils.api.requests.Precondition;
 import ru.qa.scooter.utils.global.Constants;
 import ru.qa.scooter.utils.api.requests.CourierApi;
-import ru.qa.scooter.utils.Shuffler;
 
 @Epic("Courier login. Negative tests with wrong values of parameters.")
-class NegativeBadValuesTests {
-
-    @BeforeAll
-    public static void setUp() {
-        RestAssured.baseURI = Constants.LINK;
-    }
-
+class NegativeBadValuesTests extends BaseScooter {
 
     @Test
     @DisplayName("POST /api/v1/courier/login with bad password")
     @Description("Negative test for login courier with wrong password")
     void cantLoginBadPassword() {
-        String login = Shuffler.shuffle("hichel");
-        String password = Shuffler.shuffle("hejhy");
-        String firstName = Shuffler.shuffle("myName");
+        String login = Constants.FAKER.name().username();
+        String password = Constants.FAKER.regexify(Constants.PASS_REGEX);
+        String firstName = Constants.FAKER.name().firstName();
 
         Courier<String, String, String> courier = new Courier<>(login, password, firstName);
 
@@ -39,7 +31,7 @@ class NegativeBadValuesTests {
 
         CourierWithoutFirstName<String, String> courierLogin = new CourierWithoutFirstName<>(
                                                                         login,
-                                                                        Shuffler.changeHalves(password)
+                                                                        Constants.FAKER.regexify(Constants.PASS_REGEX)
         );
 
         Response responseLogin = CourierApi.loginCourier(courierLogin);
@@ -54,8 +46,8 @@ class NegativeBadValuesTests {
     @DisplayName("POST /api/v1/courier/login. Negative. Courier doesn't exist")
     @Description("Negative test for login courier with non-existed login, status code 404")
     void cantLoginCourierDoesNotExist() {
-        String login = Shuffler.shuffle("hichel");
-        String password = Shuffler.shuffle("hejhy");
+        String login = Constants.FAKER.name().username();
+        String password = Constants.FAKER.regexify(Constants.PASS_REGEX);
 
         String jsonPath = "message";
         String expected = "Учетная запись не найдена";

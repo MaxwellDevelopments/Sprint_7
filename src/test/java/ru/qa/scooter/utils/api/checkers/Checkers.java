@@ -30,6 +30,8 @@ public class Checkers {
         response.then().assertThat().statusCode(201);
     }
 
+
+
     @Step("Check response has status 200")
     public static void check200Success(Response response) {
         response.then().assertThat().statusCode(200);
@@ -49,4 +51,10 @@ public class Checkers {
     public static void check404NotFound(Response response) {
         response.then().assertThat().statusCode(404);
     }
+
+    @Step("Check response has status T")
+    public static void checkTStatus(Response response, int statusCode) {
+        response.then().assertThat().statusCode(statusCode);
+    }
+
 }

@@ -2,61 +2,39 @@ package ru.qa.scooter.tests.courier.create;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
-import io.restassured.RestAssured;
+import io.qameta.allure.Step;
 import io.restassured.response.Response;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import ru.qa.scooter.utils.Shuffler;
+import ru.qa.scooter.tests.base.BaseScooter;
 import ru.qa.scooter.utils.api.requests.Postcondition;
-import ru.qa.scooter.utils.global.Constants;
 import ru.qa.scooter.business.pojo.courier.Courier;
-import ru.qa.scooter.business.pojo.courier.CourierWithoutFirstName;
 import ru.qa.scooter.utils.api.checkers.Checkers;
 import ru.qa.scooter.utils.api.requests.CourierApi;
-
-import static org.hamcrest.Matchers.notNullValue;
+import ru.qa.scooter.utils.global.Constants;
 
 @Epic("Courier create. Negative tests with non-string types of parameters in JSON")
-class NegativeBadTypeTests {
+class NegativeBadTypeTests extends BaseScooter {
 
-    @BeforeAll
-    public static void setUp() {
-        RestAssured.baseURI = Constants.LINK;
-    }
+    private static Courier<Number, String, String> courierNumLogin;
+    private static Courier<String, Number, String> courierNumPassword;
+    private static Courier<String, String, Number> courierNumFirstname;
 
     @ParameterizedTest
     @DisplayName("POST /api/v1/courier doesn't create a courier (bad login type in JSON)")
     @Description("Negative test for creating a courier with integer login value, status code 400")
     @ValueSource(ints = {1234, 0, 1, -1, -2, 2, 1259158})
-    void cantCreateCourierIntegerLogin(Integer login) {
-        String password = Shuffler.shuffle("1234");
-        String firstName = Shuffler.shuffle("firstName");
-        String errorMessage = String.format(
-                "User was created with integer %d login value",
-                login
-        );
+    void cantCreateCourierIntegerParameter(Integer login) {
 
-        Courier<Integer, String, String> courier = new Courier<>(login, password, firstName);
+        String password = Constants.FAKER.regexify(Constants.PASS_REGEX);
+        String firstName = Constants.FAKER.name().firstName();
 
-        Response responseCreate = CourierApi.createCourier(courier);
-        try {
-            Checkers.check400BadRequest(responseCreate);
-        }
-        catch (AssertionError e) {
-            MatcherAssert.assertThat(responseCreate, notNullValue());
-            try {
-                Checkers.check201Created(responseCreate);
-            } catch (AssertionError e1) {
-                throw e;
-            }
-            Postcondition.Courier.delete(
-                    new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-            );
-            throw new AssertionError(errorMessage);
-        }
+        courierNumLogin = new Courier<>(login, password, firstName);
+
+        Response responseCreate = CourierApi.createCourier(courierNumLogin);
+        checkResponse400If201ThrowError(responseCreate, courierNumLogin);
+
     }
 
     @ParameterizedTest
@@ -64,32 +42,14 @@ class NegativeBadTypeTests {
     @Description("Negative test for creating a courier with integer password, status code 400")
     @ValueSource(ints = {1234, 0, 1, -1, -2, 2, 1259158})
     void cantCreateCourierIntegerPassword(Integer password) {
-        String login = Shuffler.shuffle("ytueytu");
-        String firstName = Shuffler.shuffle("firstName");
-        String errorMessage = String.format(
-                "User was created with integer %d password value",
-                password
-        );
+        String login = Constants.FAKER.name().username();
+        String firstName = Constants.FAKER.name().firstName();
 
+        courierNumPassword = new Courier<>(login, password, firstName);
 
-        Courier<String, Integer, String> courier = new Courier<>(login, password, firstName);
+        Response responseCreate = CourierApi.createCourier(courierNumPassword);
+        checkResponse400If201ThrowError(responseCreate, courierNumPassword);
 
-        Response responseCreate = CourierApi.createCourier(courier);
-        try {
-            Checkers.check400BadRequest(responseCreate);
-        }
-        catch (AssertionError e) {
-            MatcherAssert.assertThat(responseCreate, notNullValue());
-            try {
-                Checkers.check201Created(responseCreate);
-            } catch (AssertionError e1) {
-                throw e;
-            }
-            Postcondition.Courier.delete(
-                    new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-            );
-            throw new AssertionError(errorMessage);
-        }
 
     }
 
@@ -98,64 +58,29 @@ class NegativeBadTypeTests {
     @Description("Negative test for creating a courier with integer firstName, status code 400")
     @ValueSource(ints = {1234, 0, 1, -1, -2, 2, 1259158})
     void cantCreateCourierIntegerFirstName(Integer firstName) {
-        String login = Shuffler.shuffle("twoiuqi");
-        String password = Shuffler.shuffle("ololoev");
-        String errorMessage = String.format(
-                "User was created with integer %d firstName value",
-                firstName
-        );
+        String login = Constants.FAKER.name().username();
+        String password = Constants.FAKER.regexify(Constants.PASS_REGEX);
 
-        Courier<String, String, Integer> courier = new Courier<>(login, password, firstName);
+        courierNumFirstname = new Courier<>(login, password, firstName);
 
-        Response responseCreate = CourierApi.createCourier(courier);
-        try {
-            Checkers.check400BadRequest(responseCreate);
-        }
-        catch (AssertionError e) {
-            MatcherAssert.assertThat(responseCreate, notNullValue());
-            try {
-                Checkers.check201Created(responseCreate);
-            } catch (AssertionError e1) {
-                throw e;
-            }
-            Postcondition.Courier.delete(
-                    new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-            );
-            throw new AssertionError(errorMessage);
-        }
+        Response responseCreate = CourierApi.createCourier(courierNumFirstname);
+        checkResponse400If201ThrowError(responseCreate, courierNumFirstname);
+
     }
-
 
     @ParameterizedTest
     @DisplayName("POST /api/v1/courier doesn't create a courier (bad login type)")
     @Description("Negative test for creating a courier with float login, status code 400")
     @ValueSource(floats = {1234.0f, 0.0f, 1.0f, 0.1f, -0.1f, 2.0f, 1259158f})
     void cantCreateCourierFloatLogin(Float login) {
-        String password = Shuffler.shuffle("1234");
-        String firstName = Shuffler.shuffle("firstName");
-        String errorMessage = String.format(
-                "User was created with float %f login value",
-                login
-        );
+        String password = Constants.FAKER.regexify(Constants.PASS_REGEX);
+        String firstName = Constants.FAKER.name().firstName();
 
-        Courier<Float, String, String> courier = new Courier<>(login, password, firstName);
+        courierNumLogin = new Courier<>(login, password, firstName);
 
-        Response responseCreate = CourierApi.createCourier(courier);
-        try {
-            Checkers.check400BadRequest(responseCreate);
-        }
-        catch (AssertionError e) {
-            MatcherAssert.assertThat(responseCreate, notNullValue());
-            try {
-                Checkers.check201Created(responseCreate);
-            } catch (AssertionError e1) {
-                throw e;
-            }
-            Postcondition.Courier.delete(
-                    new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-            );
-            throw new AssertionError(errorMessage);
-        }
+        Response responseCreate = CourierApi.createCourier(courierNumLogin);
+        checkResponse400If201ThrowError(responseCreate, courierNumLogin);
+
     }
 
     @ParameterizedTest
@@ -163,32 +88,13 @@ class NegativeBadTypeTests {
     @Description("Negative test for creating a courier with float password, status code 400")
     @ValueSource(floats = {1234.0f, 0.0f, 1.0f, 0.1f, -0.1f, 2.0f, 1259158f})
     void cantCreateCourierFloatPassword(Float password) {
-        String login = Shuffler.shuffle("ytueytu");
-        String firstName = Shuffler.shuffle("firstName");
-        String errorMessage = String.format(
-                "User was created with float %f password value",
-                password
-        );
+        String login = Constants.FAKER.name().username();
+        String firstName = Constants.FAKER.name().firstName();
 
+        courierNumPassword = new Courier<>(login, password, firstName);
 
-        Courier<String, Float, String> courier = new Courier<>(login, password, firstName);
-
-        Response responseCreate = CourierApi.createCourier(courier);
-        try {
-            Checkers.check400BadRequest(responseCreate);
-        }
-        catch (AssertionError e) {
-            MatcherAssert.assertThat(responseCreate, notNullValue());
-            try {
-                Checkers.check201Created(responseCreate);
-            } catch (AssertionError e1) {
-                throw e;
-            }
-            Postcondition.Courier.delete(
-                    new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-            );
-            throw new AssertionError(errorMessage);
-        }
+        Response responseCreate = CourierApi.createCourier(courierNumPassword);
+        checkResponse400If201ThrowError(responseCreate, courierNumPassword);
 
     }
 
@@ -197,34 +103,26 @@ class NegativeBadTypeTests {
     @Description("Negative test for creating a courier with float firstName, status code 400")
     @ValueSource(floats = {1234.0f, 0.0f, 1.0f, 0.1f, -0.1f, 2.0f, 1259158f})
     void cantCreateCourierFloatFirstName(Float firstName) {
-        String login = Shuffler.shuffle("twoiuqi");
-        String password = Shuffler.shuffle("ololoev");
-        String errorMessage = String.format(
-                "User was created with float %f firstName value",
-                firstName
-        );
+        String login = Constants.FAKER.name().username();
+        String password = Constants.FAKER.regexify(Constants.PASS_REGEX);
 
-        Courier<String, String, Float> courier = new Courier<>(login, password, firstName);
+        courierNumFirstname = new Courier<>(login, password, firstName);
 
-        Response responseCreate = CourierApi.createCourier(courier);
+        Response responseCreate = CourierApi.createCourier(courierNumFirstname);
+        checkResponse400If201ThrowError(responseCreate, courierNumFirstname);
+
+    }
+
+    @Step("Check that status in response is 400. If status code is 201, then delete courier.")
+    private <T, V, K> void checkResponse400If201ThrowError(Response responseCreate, Courier<T, V, K> courier) {
         try {
             Checkers.check400BadRequest(responseCreate);
         }
         catch (AssertionError e) {
-            MatcherAssert.assertThat(responseCreate, notNullValue());
-            try {
-                Checkers.check201Created(responseCreate);
-            } catch (AssertionError e1) {
-                throw e;
-            }
-            Postcondition.Courier.delete(
-                    new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-            );
-            throw new AssertionError(errorMessage);
+            Checkers.check201Created(responseCreate);
+            Postcondition.Courier.delete(courier);
+            throw e;
         }
     }
-
-
-
 
 }

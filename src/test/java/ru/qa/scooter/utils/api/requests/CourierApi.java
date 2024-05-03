@@ -3,41 +3,39 @@ package ru.qa.scooter.utils.api.requests;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import ru.qa.scooter.business.pojo.courier.AbstractCourier;
-import ru.qa.scooter.business.pojo.courier.Courier;
 import ru.qa.scooter.business.pojo.courier.CourierId;
-import ru.qa.scooter.utils.api.checkers.Checkers;
 import ru.qa.scooter.utils.api.responses.ResponseWithToString;
 
 import static io.restassured.RestAssured.given;
 
 public class CourierApi {
 
-    private final static String createEndPoint = "/api/v1/courier/";
+    private final static String CREATE_ENDPOINT = "/api/v1/courier/";
 
-    private final static String loginEndPoint = "/api/v1/courier/login/";
+    private final static String LOGIN_ENDPOINT = "/api/v1/courier/login/";
 
-    private final static String deleteEndPoint = createEndPoint;
+    private final static String DELETE_ENDPOINT = CREATE_ENDPOINT;
 
-    public static String getCreateEndPoint() {
-        return createEndPoint;
+    public static String getCreateEndpoint() {
+        return CREATE_ENDPOINT;
     }
 
-    public static String getLoginEndPoint() {
-        return loginEndPoint;
+    public static String getLoginEndpoint() {
+        return LOGIN_ENDPOINT;
     }
 
     public static String getDeleteEndPoint(int id) {
-        return String.format("%s%d", deleteEndPoint, id);
+        return String.format("%s%d", DELETE_ENDPOINT, id);
     }
 
-    public static String getDeleteEndPoint() {
-        return deleteEndPoint;
+    public static String getDeleteEndpoint() {
+        return DELETE_ENDPOINT;
     }
 
     private static String getCreateResponseBody(Response response) {
         return String.format(
                 "Create courier POST %s. \nBody:\n%s",
-                getCreateEndPoint(),
+                getCreateEndpoint(),
                 response.body().asPrettyString()
         );
     }
@@ -45,7 +43,7 @@ public class CourierApi {
     private static String getLoginResponseBody(Response response) {
         return String.format(
                 "Login courier POST %s. \nBody:\n%s",
-                getLoginEndPoint(),
+                getLoginEndpoint(),
                 response.body().asPrettyString()
         );
     }
@@ -70,7 +68,7 @@ public class CourierApi {
                 .and()
                 .body(courier)
                 .when()
-                .post(getLoginEndPoint());
+                .post(getLoginEndpoint());
 
         return new ResponseWithToString(response,
                 getLoginResponseBody(response));
@@ -89,7 +87,7 @@ public class CourierApi {
         return given()
                 .header("Content-type", "application/json")
                 .when()
-                .delete(getDeleteEndPoint());
+                .delete(getDeleteEndpoint());
     }
 
 
@@ -108,7 +106,7 @@ public class CourierApi {
                 .and()
                 .body(courier)
                 .when()
-                .post(getCreateEndPoint());
+                .post(getCreateEndpoint());
 
         return new ResponseWithToString(response,
                 getCreateResponseBody(response));

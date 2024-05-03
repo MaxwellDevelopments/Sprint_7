@@ -4,12 +4,10 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
-import ru.qa.scooter.utils.Shuffler;
+import ru.qa.scooter.tests.base.BaseScooter;
 import ru.qa.scooter.utils.api.requests.Postcondition;
 import ru.qa.scooter.utils.global.Constants;
 import ru.qa.scooter.business.pojo.courier.Courier;
@@ -18,11 +16,15 @@ import ru.qa.scooter.utils.api.checkers.Checkers;
 import ru.qa.scooter.utils.api.requests.CourierApi;
 
 @Epic("Courier create. Positive tests")
-class PositiveTests {
+class PositiveTests extends BaseScooter {
 
-    @BeforeAll
-    public static void setUp() {
-        RestAssured.baseURI = Constants.LINK;
+    private static Courier<String, String, String> courier = new Courier<>();
+
+    @AfterEach
+    void delCourier() {
+        Postcondition.Courier.delete(
+                new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
+        );
     }
 
     @ParameterizedTest
@@ -33,48 +35,39 @@ class PositiveTests {
         String jsonPath = "ok";
         Boolean expected = true;
 
-        Courier<String, String, String> courier = new Courier<>(login, password, firstName);
+        courier = new Courier<>(login, password, firstName);
 
         Response responseCreate = CourierApi.createCourier(courier);
         Checkers.check201Created(responseCreate);
         Checkers.checkAnswerInResponse(responseCreate, jsonPath, expected);
 
-        Postcondition.Courier.delete(
-                new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-        );
     }
 
     @Test
     @DisplayName("POST /api/v1/courier doesn't create a courier with same login")
     @Description("Can't create a courier if courier with that login already existed, status code 409")
     void cantCreateCourierWithSameLogin() {
-        String login = Shuffler.shuffle("agasgas");
-        String password = Shuffler.shuffle("agasg");
-        String firstName = Shuffler.shuffle("fhajs");
+        String login = Constants.FAKER.name().username();
+        String password = Constants.FAKER.regexify(Constants.PASS_REGEX);
+        String firstName = Constants.FAKER.name().firstName();
 
         String jsonPath = "ok";
         Boolean expected = true;
 
-        Courier<String, String, String> courier = new Courier<>(login, password, firstName);
+        courier = new Courier<>(login, password, firstName);
 
         Response responseCreate = CourierApi.createCourier(courier);
         Checkers.check201Created(responseCreate);
         Checkers.checkAnswerInResponse(responseCreate, jsonPath, expected);
 
-        try {
-            Response responseConflict = CourierApi.createCourier(courier);
-            Checkers.check409Conflict(responseConflict);
-            Checkers.checkAnswerInResponse(
-                    responseConflict,
-                    "message",
-                    "Этот логин уже используется");
-        }
-        catch (AssertionError e) {
-            Postcondition.Courier.delete(
-                    new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-            );
-            throw e;
-        }
+
+        Response responseConflict = CourierApi.createCourier(courier);
+        Checkers.check409Conflict(responseConflict);
+        Checkers.checkAnswerInResponse(
+                responseConflict,
+                "message",
+                "Этот логин уже используется");
+
     }
 
 }
