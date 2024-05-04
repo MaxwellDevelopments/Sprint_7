@@ -15,6 +15,7 @@ import ru.qa.scooter.utils.api.requests.OrderApi;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.notNullValue;
@@ -42,15 +43,17 @@ class MakeOrderColorTests {
     @ParameterizedTest
     @MethodSource("getColorsData")
     void makeOrderTestDifferentColors(int statusCode, String... colors) {
+        Random randInt = new Random();
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String firstName = "Itachi";
-        String lastName = "Uchiha";
-        String address = "Uchiha clan";
-        int metroStation = 4;
-        String phone = "+7 800 555 35 35";
-        int rentTime = 3;
-        String deliveryDate = LocalDate.now().plusDays(2).format(formatter);
-        String comment = "Next time, Saske";
+        String firstName = Constants.FAKER.name().firstName();
+        String lastName = Constants.FAKER.name().lastName();
+        String address = Constants.FAKER.address().streetAddress();
+        int metroStation = randInt.nextInt(4) + 1;
+        String phone = Constants.FAKER.phoneNumber().cellPhone();
+        int rentTime = randInt.nextInt(6) + 1;
+        String deliveryDate = LocalDate.now().plusDays(randInt.nextInt(2) + 1).format(formatter);
+        String comment = Constants.FAKER.letterify("???????????");
         List<String> colorsList = List.of(colors);
 
         Order order = new Order(

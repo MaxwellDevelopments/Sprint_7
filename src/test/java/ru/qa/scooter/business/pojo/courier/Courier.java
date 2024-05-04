@@ -1,6 +1,6 @@
 package ru.qa.scooter.business.pojo.courier;
 
-public class Courier <T, V, K> extends AbstractCourier {
+public class Courier <T, V, K> {
     private T login;
     private V password;
     private K firstName;

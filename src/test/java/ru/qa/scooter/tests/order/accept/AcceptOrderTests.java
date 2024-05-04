@@ -4,11 +4,11 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.qa.scooter.business.pojo.courier.Courier;
 import ru.qa.scooter.business.pojo.courier.CourierId;
-import ru.qa.scooter.business.pojo.courier.CourierWithoutFirstName;
 import ru.qa.scooter.business.pojo.order.Order;
 import ru.qa.scooter.business.pojo.order.OrderId;
 import ru.qa.scooter.tests.base.BaseScooter;
@@ -29,17 +29,21 @@ import static org.hamcrest.Matchers.is;
 @Epic("Order accept.")
 class AcceptOrderTests extends BaseScooter {
 
+    private static Response responseCourierCreate;
+    private static int courierId;
+
     private static Order getOrder(String firstName, List<String> colors) {
         Random randInt = new Random();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String lastName = Constants.FAKER.name().lastName();
+
         String address = Constants.FAKER.address().streetAddress();
         int metroStation = randInt.nextInt(4) + 1;
         String phone = Constants.FAKER.phoneNumber().cellPhone();
         int rentTime = randInt.nextInt(6) + 1;
         String deliveryDate = LocalDate.now().plusDays(randInt.nextInt(2) + 1).format(formatter);
-        String comment = Constants.FAKER.letterify("???????????");
+        String comment = Constants.FAKER.lorem().fixedString(new Random().nextInt(10)+3);
 
         return new Order(
                 firstName,
@@ -66,9 +70,11 @@ class AcceptOrderTests extends BaseScooter {
         Boolean expected = true;
         int statusCode = 200;
 
-        Precondition.Courier.create(new Courier<>(login, password, firstName));
+        Courier<String, String, String> courier = new Courier<>(login, password, firstName);
 
-        int courierId = CourierApi.getId(new CourierWithoutFirstName<>(login, password));
+        responseCourierCreate = Precondition.Courier.create(courier);
+
+        courierId = CourierApi.getId(courier);
 
         List<String> colorsList = List.of("BLACK");
         Order order = getOrder(firstName, colorsList);
@@ -86,26 +92,7 @@ class AcceptOrderTests extends BaseScooter {
                 courierId
         );
 
-        Postcondition.Courier.delete(courierId);
     }
-
-    @Step("Check response has status T and message. If status is not T then delete courier")
-    public <T> void checkStatusTAndMessageElseDeleteCourierAndThrowException(
-            Response response,
-            int statusCode,
-            String jsonPath,
-            T expected,
-            int courierId) {
-
-        try {
-            Checkers.checkTStatus(response, statusCode);
-            Checkers.checkAnswerInResponse(response, jsonPath, is(expected));
-        } catch (AssertionError e) {
-            Postcondition.Courier.delete(courierId);
-            throw e;
-        }
-    }
-
 
     @Test
     @DisplayName("PUT /api/v1/orders/accept/:id?courierId=:id")
@@ -137,14 +124,14 @@ class AcceptOrderTests extends BaseScooter {
 
         int statusCode = 404;
 
-        Precondition.Courier.create(new Courier<>(login, password, firstName));
-
         int orderId = 999999999;
         String jsonPath = "message";
         String expected = "Заказа с таким id не существует";
 
-        int courierId = CourierApi.getId(new CourierWithoutFirstName<>(login, password));
+        Courier<String, String, String> courier = new Courier<>(login, password, firstName);
 
+        responseCourierCreate = Precondition.Courier.create(courier);
+        courierId = CourierApi.getId(courier);
 
         Response responseAccept = OrderApi.acceptOrder(orderId, courierId);
         checkStatusTAndMessageElseDeleteCourierAndThrowException(
@@ -155,9 +142,7 @@ class AcceptOrderTests extends BaseScooter {
                 courierId
         );
 
-        Postcondition.Courier.delete(courierId);
     }
-
 
     @Test
     @DisplayName("PUT /api/v1/orders/accept/:id?courierId=:id")
@@ -172,8 +157,10 @@ class AcceptOrderTests extends BaseScooter {
         String jsonPath = "message";
         String expected = "Недостаточно данных для поиска";
 
-        Precondition.Courier.create(new Courier<>(login, password, firstName));
-        int courierId = CourierApi.getId(new CourierWithoutFirstName<>(login, password));
+        Courier<String, String, String> courier = new Courier<>(login, password, firstName);
+
+        responseCourierCreate = Precondition.Courier.create(courier);
+        courierId = CourierApi.getId(courier);
 
         Response responseAccept = OrderApi.acceptOrder(new CourierId(courierId));
         checkStatusTAndMessageElseDeleteCourierAndThrowException(
@@ -184,7 +171,6 @@ class AcceptOrderTests extends BaseScooter {
                 courierId
         );
 
-        Postcondition.Courier.delete(courierId);
     }
 
     @Test
@@ -203,6 +189,31 @@ class AcceptOrderTests extends BaseScooter {
         Response responseAccept = OrderApi.acceptOrder(new OrderId(orderId));
         Checkers.check400BadRequest(responseAccept);
         Checkers.checkAnswerInResponse(responseAccept, jsonPath, is(expected));
+    }
+
+    @Step("Check response has status T and message. If status is not T then delete courier")
+    public <T> void checkStatusTAndMessageElseDeleteCourierAndThrowException(
+            Response response,
+            int statusCode,
+            String jsonPath,
+            T expected,
+            int courierId) {
+
+        try {
+            Checkers.checkTStatus(response, statusCode);
+            Checkers.checkAnswerInResponse(response, jsonPath, is(expected));
+        } catch (AssertionError e) {
+            Postcondition.Courier.delete(courierId);
+            throw e;
+        }
+    }
+
+    @AfterEach
+    public void delCourier() {
+        if (responseCourierCreate != null && responseCourierCreate.getStatusCode() == 201) {
+            responseCourierCreate = null;
+            Postcondition.Courier.delete(courierId);
+        }
     }
 
 }

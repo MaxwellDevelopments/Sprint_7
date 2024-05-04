@@ -6,7 +6,6 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.qa.scooter.business.pojo.courier.Courier;
-import ru.qa.scooter.business.pojo.courier.CourierWithoutFirstName;
 import ru.qa.scooter.tests.base.BaseScooter;
 import ru.qa.scooter.utils.api.checkers.Checkers;
 import ru.qa.scooter.utils.api.requests.Postcondition;
@@ -29,17 +28,19 @@ class NegativeBadValuesTests extends BaseScooter {
 
         Precondition.Courier.create(courier);
 
-        CourierWithoutFirstName<String, String> courierLogin = new CourierWithoutFirstName<>(
-                                                                        login,
-                                                                        Constants.FAKER.regexify(Constants.PASS_REGEX)
-        );
+        Response responseLogin = CourierApi.loginCourier(courier);
 
-        Response responseLogin = CourierApi.loginCourier(courierLogin);
+        try {
+            Checkers.check404NotFound(responseLogin);
+        } catch (AssertionError e) {
+            if (responseLogin.getStatusCode() == 201) {
+                courier.setPassword(password);
+                Postcondition.Courier.delete(courier);
+            }
+            throw e;
+        }
 
-        Checkers.check404NotFound(responseLogin);
 
-        courierLogin.setPassword(password);
-        Postcondition.Courier.delete(courierLogin);
     }
 
     @Test
@@ -52,12 +53,9 @@ class NegativeBadValuesTests extends BaseScooter {
         String jsonPath = "message";
         String expected = "Учетная запись не найдена";
 
-        CourierWithoutFirstName<String, String> courierLogin = new CourierWithoutFirstName<>(
-                login,
-                password
-        );
+        Courier<String, String, String> courier = new Courier<>(login, password, null);
 
-        Response responseLogin = CourierApi.loginCourier(courierLogin);
+        Response responseLogin = CourierApi.loginCourier(courier);
 
         Checkers.check404NotFound(responseLogin);
         Checkers.checkAnswerInResponse(responseLogin, jsonPath, expected);

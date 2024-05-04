@@ -2,13 +2,10 @@ package ru.qa.scooter.tests.courier.delete;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.qa.scooter.business.pojo.courier.Courier;
-import ru.qa.scooter.business.pojo.courier.CourierWithoutFirstName;
 import ru.qa.scooter.tests.base.BaseScooter;
 import ru.qa.scooter.utils.api.checkers.Checkers;
 import ru.qa.scooter.utils.api.requests.Precondition;
@@ -29,11 +26,14 @@ class DeleteCourierTests extends BaseScooter {
         String firstName = Constants.FAKER.name().firstName();
         String jsonPath = "ok";
 
-        Precondition.Courier.create(new Courier<>(login, password, firstName));
+        Courier<String, String, String> courier = new Courier<>(login, password, firstName);
 
-        int courierId = CourierApi.getId(new CourierWithoutFirstName<>(login, password));
+        Precondition.Courier.create(courier);
+
+        int courierId = CourierApi.getId(courier);
 
         Response response = CourierApi.delCourier(courierId);
+
         Checkers.check200Success(response);
         Checkers.checkAnswerInResponse(response, jsonPath, is(true));
     }
@@ -46,6 +46,7 @@ class DeleteCourierTests extends BaseScooter {
         String expected = "Курьера с таким id нет";
 
         Response response = CourierApi.delCourier(999999999);
+
         Checkers.check404NotFound(response);
         Checkers.checkAnswerInResponse(response, jsonPath, is(expected));
     }
@@ -58,6 +59,7 @@ class DeleteCourierTests extends BaseScooter {
         String expected = "Недостаточно данных для удаления курьера";
 
         Response response = CourierApi.delCourier();
+
         Checkers.check400BadRequest(response);
         Checkers.checkAnswerInResponse(response, jsonPath, is(expected));
     }

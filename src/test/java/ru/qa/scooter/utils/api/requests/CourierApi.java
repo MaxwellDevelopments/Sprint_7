@@ -2,7 +2,7 @@ package ru.qa.scooter.utils.api.requests;
 
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
-import ru.qa.scooter.business.pojo.courier.AbstractCourier;
+import ru.qa.scooter.business.pojo.courier.Courier;
 import ru.qa.scooter.business.pojo.courier.CourierId;
 import ru.qa.scooter.utils.api.responses.ResponseWithToString;
 
@@ -57,12 +57,12 @@ public class CourierApi {
     }
 
     @Step("Get courier id")
-    public static int getId(AbstractCourier courier) {
+    public static <T, V, K> int getId(Courier<T, V, K> courier) {
         return loginCourier(courier).as(CourierId.class).getId();
     }
 
     @Step("Login courier. Send POST /api/v1/courier/login")
-    public static Response loginCourier(AbstractCourier courier) {
+    public static <T, V, K> Response loginCourier(Courier<T, V, K> courier) {
         Response response = given()
                 .header("Content-type", "application/json")
                 .and()
@@ -91,7 +91,7 @@ public class CourierApi {
     }
 
 
-    public static Response delCourier(AbstractCourier courier) {
+    public static <T, V, K> Response delCourier(Courier<T, V, K> courier) {
         int id = CourierApi.getId(courier);
         Response response = delCourier(id);
 
@@ -100,7 +100,7 @@ public class CourierApi {
     }
 
     @Step("Create courier. Send POST /api/v1/courier")
-    public static Response createCourier(AbstractCourier courier) {
+    public static <T, V, K> Response createCourier(Courier<T, V, K> courier) {
         Response response = given()
                 .header("Content-type", "application/json")
                 .and()

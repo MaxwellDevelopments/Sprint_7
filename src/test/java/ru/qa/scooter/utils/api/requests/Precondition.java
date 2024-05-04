@@ -34,7 +34,9 @@ public class Precondition {
 
         @Step("Precondition: create order")
         public static Response create(ru.qa.scooter.business.pojo.order.Order order) {
-            return OrderApi.preconditionCreateOrder(order);
+            Response response = OrderApi.makeOrder(order);
+            Checkers.check201Created(response);
+            return response;
         }
     }
 }

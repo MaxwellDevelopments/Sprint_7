@@ -5,8 +5,7 @@ import io.qameta.allure.Epic;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.qa.scooter.business.pojo.courier.CourierOnlyLogin;
-import ru.qa.scooter.business.pojo.courier.CourierOnlyPassword;
+import ru.qa.scooter.business.pojo.courier.Courier;
 import ru.qa.scooter.tests.base.BaseScooter;
 import ru.qa.scooter.utils.api.checkers.Checkers;
 import ru.qa.scooter.utils.global.Constants;
@@ -25,7 +24,7 @@ class NullValueTests extends BaseScooter {
         String jsonPath = "message";
         String expected = "Недостаточно данных для входа";
 
-        Response responseLogin = CourierApi.loginCourier(new CourierOnlyPassword<>(password));
+        Response responseLogin = CourierApi.loginCourier(new Courier<>(null, password, null));
 
         Checkers.check400BadRequest(responseLogin);
         Checkers.checkAnswerInResponse(responseLogin, jsonPath, is(expected));
@@ -39,7 +38,7 @@ class NullValueTests extends BaseScooter {
         String jsonPath = "message";
         String expected = "Недостаточно данных для входа";
 
-        Response responseLogin = CourierApi.loginCourier(new CourierOnlyLogin<>(login));
+        Response responseLogin = CourierApi.loginCourier(new Courier<>(login, null, null));
 
         Checkers.check400BadRequest(responseLogin);
         Checkers.checkAnswerInResponse(responseLogin, jsonPath, is(expected));

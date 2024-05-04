@@ -2,7 +2,6 @@ package ru.qa.scooter.tests.courier.create;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +10,6 @@ import ru.qa.scooter.tests.base.BaseScooter;
 import ru.qa.scooter.utils.api.requests.Postcondition;
 import ru.qa.scooter.utils.global.Constants;
 import ru.qa.scooter.business.pojo.courier.Courier;
-import ru.qa.scooter.business.pojo.courier.CourierWithoutFirstName;
 import ru.qa.scooter.utils.api.checkers.Checkers;
 import ru.qa.scooter.utils.api.requests.CourierApi;
 
@@ -22,9 +20,7 @@ class PositiveTests extends BaseScooter {
 
     @AfterEach
     void delCourier() {
-        Postcondition.Courier.delete(
-                new CourierWithoutFirstName<>(courier.getLogin(), courier.getPassword())
-        );
+        Postcondition.Courier.delete(courier);
     }
 
     @ParameterizedTest

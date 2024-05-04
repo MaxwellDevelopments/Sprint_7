@@ -74,15 +74,6 @@ public class OrderApi {
         );
     }
 
-
-
-    @Step("Precondition: create order")
-    protected static Response preconditionCreateOrder(Order order) {
-        Response response = makeOrder(order);
-        Checkers.check201Created(response);
-        return response;
-    }
-
     @Step("Make order. POST /api/v1/orders")
     public static Response makeOrder(Order order) {
         Response response = given()
